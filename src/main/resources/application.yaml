@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: spotnik
+application:
+  nerservice:
+    port: 5001
+    host: localhost
+    protocol: http
+    endpoints:
+      extractEntities: /extract_entities
+
+server:
+  port: 80
+  servlet:
+    context-path: /spotnik
