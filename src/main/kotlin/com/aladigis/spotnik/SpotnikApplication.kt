@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class SpotnikApplication
 
 fun main(args: Array<String>) {
-	runApplication<SpotnikApplication>(*args)
+    runApplication<SpotnikApplication>(*args)
 }

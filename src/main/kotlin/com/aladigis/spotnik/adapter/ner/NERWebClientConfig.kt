@@ -6,7 +6,6 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class NERWebClientConfig {
-
     @Bean
     fun nerWebClient(): WebClient {
         return WebClient.builder().build()

@@ -1,6 +1,6 @@
 package com.aladigis.spotnik.adapter.web.dto
 
-data class SpotEntityDto (
+data class SpotEntityDto(
     val start: Int,
     val end: Int,
     val label: String,

@@ -58,9 +58,9 @@ class RequestResponseLoggingFilter : Filter {
     private fun getResponseLog(response: ContentCachingResponseWrapper): String {
         val responseString =
             String(response.contentAsByteArray, Charset.forName("UTF-8"))
-                .replace("\n", " ") // replace newlines with spaces
-                .replace("\r", "") // remove carriage returns
-                .trim() // remove leading/trailing whitespace
+                .replace("\n", " ")
+                .replace("\r", "")
+                .trim()
 
         return if (responseString.length > MAX_RESPONSE_SIZE) {
             "${responseString.substring(0, MAX_RESPONSE_SIZE)}[$MAX_RESPONSE_SIZE of ${responseString.length} chars]"

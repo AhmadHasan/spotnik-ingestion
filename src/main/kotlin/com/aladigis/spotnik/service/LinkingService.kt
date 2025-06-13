@@ -1,4 +1,3 @@
 package com.aladigis.spotnik.service
 
-class LinkingService {
-}
+class LinkingService

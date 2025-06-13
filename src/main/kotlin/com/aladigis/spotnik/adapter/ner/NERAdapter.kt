@@ -1,7 +1,6 @@
 package com.aladigis.spotnik.adapter.ner
 
 import com.aladigis.spotnik.port.NERPort
-
 import com.aladigis.spotnik.port.dto.NERResponseDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,7 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Component
 class NERAdapter : NERPort {
-
     @Autowired
     private lateinit var nerServiceConfig: NERServiceConfig
 
@@ -19,20 +17,24 @@ class NERAdapter : NERPort {
 
     private val logger = LoggerFactory.getLogger(NERAdapter::class.java)
 
-
     override fun extractEntities(text: String): NERResponseDto {
-        val url = "${nerServiceConfig.protocol}://${nerServiceConfig.host}:${nerServiceConfig.port}/${nerServiceConfig.endpoints["extractEntities"] ?: "extractEntities"}"
+        val url =
+            "${nerServiceConfig.protocol}://" +
+                "${nerServiceConfig.host}:${nerServiceConfig.port}/" +
+                "${nerServiceConfig.endpoints["extractEntities"] ?: "extractEntities"}"
+
         logger.info("Calling NER Service at URL: $url")
 
         val startTime = System.currentTimeMillis()
 
-        val response = nerWebClient.post()
-            .uri(url)
-            .header("Content-Type", "application/json")
-            .bodyValue(mapOf("text" to text))
-            .retrieve()
-            .bodyToMono(NERResponseDto::class.java)
-            .block()
+        val response =
+            nerWebClient.post()
+                .uri(url)
+                .header("Content-Type", "application/json")
+                .bodyValue(mapOf("text" to text))
+                .retrieve()
+                .bodyToMono(NERResponseDto::class.java)
+                .block()
 
         val endTime = System.currentTimeMillis()
         val responseTime = endTime - startTime
