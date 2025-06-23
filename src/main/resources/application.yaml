@@ -1,6 +1,11 @@
 spring:
   application:
     name: spotnik
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: wikidata
 application:
   nerservice:
     port: 5001
@@ -10,6 +15,6 @@ application:
       extractEntities: /extract_entities
 
 server:
-  port: 80
+  port: 8080
   servlet:
     context-path: /spotnik

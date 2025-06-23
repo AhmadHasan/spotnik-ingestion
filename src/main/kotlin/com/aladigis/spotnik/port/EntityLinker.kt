@@ -1,7 +1,10 @@
 package com.aladigis.spotnik.port
 
-import com.aladigis.spotnik.model.SpottedEntity
+import com.aladigis.spotnik.port.dto.LinkingResult
 
 interface EntityLinker {
-    fun link(entityLabel: String): SpottedEntity?
+    fun link(
+        language: String,
+        labels: List<String>,
+    ): LinkingResult
 }
