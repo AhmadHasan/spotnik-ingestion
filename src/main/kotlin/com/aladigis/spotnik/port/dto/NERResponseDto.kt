@@ -1,9 +1,9 @@
 package com.aladigis.spotnik.port.dto
 
-import com.aladigis.spotnik.adapter.ner.NEREntity
+import com.aladigis.spotnik.adapter.ner.NEREntityDto
 
 data class NERResponseDto(
     val success: Boolean,
     val language: String,
-    val entities: List<NEREntity>,
+    val entities: List<NEREntityDto>,
 )

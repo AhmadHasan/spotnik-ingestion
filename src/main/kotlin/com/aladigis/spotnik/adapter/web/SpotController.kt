@@ -36,10 +36,10 @@ class SpotController {
                             end = entity.end,
                             label = entity.label,
                             entityId = entity.entityId,
-                            wikipediaUrl = null,
+                            wikipediaUrl = entity.wikipediaUrl,
                             wikidataUrl = null,
                             description = null,
-                            imageUrl = null,
+                            imageUrl = entity.imageUrl,
                         )
                     },
             )

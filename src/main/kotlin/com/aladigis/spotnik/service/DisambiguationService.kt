@@ -13,9 +13,9 @@ class DisambiguationService : Disambiguator {
         language: String,
     ): DisambiguationResult {
         return DisambiguationResult(
-            linkingResult.labelEntities.map {
+            linkingResult.labelEntityIds.map {
                     labelEntity ->
-                DisambiguatedLabel(labelEntity.key, labelEntity.value.first() ?: "")
+                DisambiguatedLabel(labelEntity.key, labelEntity.value.first())
             },
         )
     }

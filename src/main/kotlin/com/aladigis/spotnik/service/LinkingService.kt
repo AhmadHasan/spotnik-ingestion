@@ -11,20 +11,27 @@ class LinkingService : EntityLinker {
     @Autowired
     private lateinit var linkedLabelDataPort: LinkedLabelDataPort
 
+    @Autowired
+    private lateinit var linkedEntityDataPort: com.aladigis.spotnik.port.data.LinkedEntityDataPort
+
     override fun link(
         language: String,
         labels: List<String>,
     ): LinkingResult {
-        val links = linkedLabelDataPort.findByValueInAndLanguage(labels, language)
-        // map each label to all entities  that match it
-        val labelEntities =
-            links.groupBy { it.value.lowercase() }
-                .mapValues { (_, linkedLabels) ->
-                    linkedLabels.map { it.entityId }
-                }
+        val labels = linkedLabelDataPort.findByValueInAndLanguage(labels, language)
+        val entityIds = labels.map { it.entityId }
+        val entities = linkedEntityDataPort.findByIds(entityIds)
+
+        val labelEntityIds = labels
+            .groupBy { it.value }
+            .mapValues { entry ->
+                entry.value.map { label ->
+                    entities.find { it.id == label.entityId }
+                }.filterNotNull()
+            }
         return LinkingResult(
-            text = labels.joinToString(", "),
-            labelEntities = labelEntities,
+            text = labels.joinToString(", ") { it.value },
+            labelEntityIds = labelEntityIds,
         )
     }
 }
