@@ -9,4 +9,5 @@ data class SpotEntityDto(
     val wikidataUrl: String? = null,
     val description: String? = null,
     val imageUrl: String? = null,
+    val caption: String = "",
 )

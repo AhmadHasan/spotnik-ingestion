@@ -7,6 +7,6 @@ data class SpottedEntity(
     val entityId: String,
     val wikipediaUrl: String? = null,
     val wikidataUrl: String? = null,
-    val description: String? = null,
+    val description: String = "",
     val imageUrl: String? = null,
 )

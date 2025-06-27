@@ -38,8 +38,9 @@ class SpotController {
                             entityId = entity.entityId,
                             wikipediaUrl = entity.wikipediaUrl,
                             wikidataUrl = null,
-                            description = null,
+                            description = entity.description,
                             imageUrl = entity.imageUrl,
+                            caption = entity.label + ": " + entity.description,
                         )
                     },
             )

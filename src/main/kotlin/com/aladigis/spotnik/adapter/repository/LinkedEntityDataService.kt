@@ -5,15 +5,12 @@ import com.aladigis.spotnik.port.data.LinkedEntityDataPort
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-
 @Component
-class LinkedEntityDataService: LinkedEntityDataPort {
-
+class LinkedEntityDataService : LinkedEntityDataPort {
     @Autowired
     private lateinit var linkedEntityRepository: LinkedEntityRepotirory
-    override fun findByIds(
-        ids: List<String>
-    ): List<LinkedEntity> {
+
+    override fun findByIds(ids: List<String>): List<LinkedEntity> {
         return linkedEntityRepository.findAllById(ids)
     }
 }

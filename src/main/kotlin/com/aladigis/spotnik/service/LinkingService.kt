@@ -22,13 +22,14 @@ class LinkingService : EntityLinker {
         val entityIds = labels.map { it.entityId }
         val entities = linkedEntityDataPort.findByIds(entityIds)
 
-        val labelEntityIds = labels
-            .groupBy { it.value }
-            .mapValues { entry ->
-                entry.value.map { label ->
-                    entities.find { it.id == label.entityId }
-                }.filterNotNull()
-            }
+        val labelEntityIds =
+            labels
+                .groupBy { it.value }
+                .mapValues { entry ->
+                    entry.value.map { label ->
+                        entities.find { it.id == label.entityId }
+                    }.filterNotNull()
+                }
         return LinkingResult(
             text = labels.joinToString(", ") { it.value },
             labelEntityIds = labelEntityIds,

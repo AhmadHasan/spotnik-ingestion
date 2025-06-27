@@ -8,7 +8,7 @@ data class LinkedEntity(
     @Id
     val id: String,
     val qid: String,
-    val mainImage: String,
+    val mainImage: String?,
     val descriptions: Map<String, String>,
     val instanceOf: List<String>,
 )

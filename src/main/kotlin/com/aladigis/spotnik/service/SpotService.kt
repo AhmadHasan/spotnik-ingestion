@@ -40,28 +40,35 @@ class SpotService : SpotPort {
         return spottedEntities
     }
 
-    private fun mergeResults(nerEntities: NERResponseDto, linkingResults: LinkingResult, disambiguated: DisambiguationResult): List<SpottedEntity> {
+    private fun mergeResults(
+        nerEntities: NERResponseDto,
+        linkingResults: LinkingResult,
+        disambiguated: DisambiguationResult,
+    ): List<SpottedEntity> {
         return nerEntities.entities.map { entity ->
             SpottedEntity(
                 label = entity.text,
                 start = entity.startChar,
                 end = entity.endChar,
                 entityId =
-                disambiguated.labelEntities
-                    .find { it.label.equals(entity.text, ignoreCase = true) }
-                    ?.entity?.id?: "",
+                    disambiguated.labelEntities
+                        .find { it.label.equals(entity.text, ignoreCase = true) }
+                        ?.entity?.id ?: "",
+                description =
+                    disambiguated.labelEntities
+                        .find { it.label.equals(entity.text, ignoreCase = true) }
+                        ?.entity?.descriptions?.get(nerEntities.language) ?: "",
                 wikipediaUrl =
-                urlGenerator.generateEntityWikipediaUrl(
-                    nerEntities.language,
-                    entity.text,
-                ),
+                    urlGenerator.generateEntityWikipediaUrl(
+                        nerEntities.language,
+                        entity.text,
+                    ),
                 imageUrl =
-                urlGenerator.generateEntityImageUrl(
-                    disambiguated.labelEntities.find { it.label.equals(entity.text, ignoreCase = true) }
-                        ?.entity?.mainImage?:""
-                ),
+                    urlGenerator.generateEntityImageUrl(
+                        disambiguated.labelEntities.find { it.label.equals(entity.text, ignoreCase = true) }
+                            ?.entity?.mainImage ?: "",
+                    ),
             )
         }
-
     }
 }
