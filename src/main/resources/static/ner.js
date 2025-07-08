@@ -27,9 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     const item = document.createElement("div");
                     item.className = "carousel-item";
                     item.innerHTML = `
-                        <p>${entity.caption}</p>
+                        <p><b>${entity.label}</b></p>
                         <p><a href="${entity.wikipediaUrl}" target="_blank">Wikipedia</a></p>
                         <p><img src="${entity.imageUrl}" alt="${entity.label}" /></p>
+                        <p>${entity.caption}</p>
                     `;
                     carouselInner.appendChild(item);
                 });

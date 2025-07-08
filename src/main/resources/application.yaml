@@ -1,20 +1,25 @@
 spring:
   application:
-    name: spotnik
+    name: spotnik-ingestion
   data:
     mongodb:
       host: localhost
       port: 27017
       database: wikidata
-application:
-  nerservice:
-    port: 5001
-    host: localhost
-    protocol: http
-    endpoints:
-      extractEntities: /extract_entities
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+
 
 server:
-  port: 8080
+  port: 8081
   servlet:
-    context-path: /spotnik
+    context-path: /spotnik-ingestion
+
+
+kafka:
+  bootstrap-servers: localhost:9092
+
+spotnik:
+  ingestion:
+    batch-size: 100

@@ -1,0 +1,1 @@
+docker-compose -f redpanda.yaml -f mongodb.yaml up -d

@@ -1,1 +1,1 @@
-rootProject.name = "spotnik"
+rootProject.name = "spotnik-ingestion"
