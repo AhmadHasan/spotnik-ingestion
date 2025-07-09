@@ -12,7 +12,7 @@ spring:
 
 
 server:
-  port: 8081
+  port: 8082
   servlet:
     context-path: /spotnik-ingestion
 
@@ -22,4 +22,4 @@ kafka:
 
 spotnik:
   ingestion:
-    batch-size: 100
+    batch-size: 1000

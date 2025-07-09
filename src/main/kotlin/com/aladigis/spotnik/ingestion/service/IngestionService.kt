@@ -59,7 +59,7 @@ class IngestionService: IngestionPort, ApplicationListener<IngestionBatchRead> {
             file.bufferedReader()
         }
 
-        var counter = 0
+        var counter = -1
         val batchSize = appConfig.batchSize
 
         val lines = mutableListOf<String>()
@@ -67,22 +67,21 @@ class IngestionService: IngestionPort, ApplicationListener<IngestionBatchRead> {
 
         reader.use { bufferedReader ->
             bufferedReader.lines().forEach { line ->
-                print("\rProcessing line $counter")
+                counter++
+
+                if(fromLine > 0) {
+                    if(counter < fromLine) {
+                        print("\rskipping line number $counter to reach line number $fromLine.")
+                        return@forEach
+                    }
+                }
+                print("\rProcessing line number $counter: $line")
                 val trimmedLine = line.trim()
                 if (trimmedLine.isEmpty() || trimmedLine == "[" || trimmedLine == "]") return@forEach
 
                 val jsonLine = if (trimmedLine.endsWith(",")) trimmedLine.dropLast(1) else trimmedLine
 
                 lines.add(jsonLine)
-
-                if(fromLine > 0) {
-                    if(counter < fromLine) {
-                        logger.info("\rForwarding to line number $fromLine...")
-                        return@forEach
-                    }else {
-                        logger.info("Forwarded to line number $fromLine. Starting processing from here.")
-                    }
-                }
 
                 if(toLine < Int.MAX_VALUE && counter >= toLine) {
                     logger.info("Reached the end line $toLine. Stopping processing.")
@@ -91,7 +90,7 @@ class IngestionService: IngestionPort, ApplicationListener<IngestionBatchRead> {
                     return@forEach
                 }
 
-                if(++counter % batchSize == 0){
+                if(counter % batchSize == 0){
                     publishLines(lines)
                     lines.clear()
                 }
@@ -166,7 +165,7 @@ class IngestionService: IngestionPort, ApplicationListener<IngestionBatchRead> {
         ?.mapNotNull { statement ->
             val mainsnak = statement.get("mainsnak")
             val datavalue = mainsnak?.get("datavalue")
-            datavalue?.get("value")?.asText()
+            datavalue?.get("value")?.get("id")?.asText()
         }?.toList() ?: emptyList()
 
     // Extract mainImage
