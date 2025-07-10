@@ -1,6 +1,5 @@
 package com.aladigis.spotnik.ingestion.adapter.repository
 
-
 import com.aladigis.spotnik.ingestion.model.LinkedLabel
 import com.aladigis.spotnik.ingestion.port.data.LinkedLabelDataPort
 import org.slf4j.LoggerFactory
@@ -46,9 +45,7 @@ class LinkedLabelDataService : LinkedLabelDataPort {
         return result
     }
 
-    override fun saveAll(
-        linkedLabels: List<LinkedLabel>,
-    ): List<LinkedLabel> {
+    override fun saveAll(linkedLabels: List<LinkedLabel>): List<LinkedLabel> {
         val startTime = System.currentTimeMillis()
         val result = linkedLabelRepository.saveAll(linkedLabels)
         logger.info("Repository call saveAll with ${linkedLabels.size} labels took ${System.currentTimeMillis() - startTime} ms")

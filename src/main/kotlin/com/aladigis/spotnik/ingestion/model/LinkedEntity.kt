@@ -10,5 +10,6 @@ data class LinkedEntity(
     val mainImage: String?,
     val descriptions: Map<String, String>,
     val instanceOf: List<String>,
-    val features: Map<String, List<String>>
+    val features: Map<String, List<String>>,
+    val wikipediaUrlNames: Map<String, String>,
 )

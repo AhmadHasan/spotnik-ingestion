@@ -1,8 +1,5 @@
 package com.aladigis.spotnik.ingestion.port
 
-
-
-
 import com.aladigis.spotnik.ingestion.model.LinkedLabel
 
 interface LinkedDataPort {

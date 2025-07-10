@@ -4,9 +4,9 @@ import com.aladigis.spotnik.ingestion.config.traceid.TraceIdInterceptor
 import com.aladigis.spotnik.ingestion.model.LinkedEntity
 import com.aladigis.spotnik.ingestion.port.data.LinkedEntityDataPort
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.slf4j.MDC
 
 @Component
 class LinkedEntityDataService : LinkedEntityDataPort {
@@ -14,7 +14,6 @@ class LinkedEntityDataService : LinkedEntityDataPort {
     private lateinit var linkedEntityRepository: LinkedEntityRepository
 
     val logger = LoggerFactory.getLogger(LinkedEntityDataService::class.java)
-
 
     override fun findByIds(ids: List<String>): List<LinkedEntity> {
         val startTime = System.currentTimeMillis()

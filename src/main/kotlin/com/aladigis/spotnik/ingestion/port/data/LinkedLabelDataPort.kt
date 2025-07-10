@@ -22,7 +22,5 @@ interface LinkedLabelDataPort {
         language: String,
     ): List<LinkedLabel>
 
-    fun saveAll(
-        linkedLabels: List<LinkedLabel>,
-    ): List<LinkedLabel>
+    fun saveAll(linkedLabels: List<LinkedLabel>): List<LinkedLabel>
 }

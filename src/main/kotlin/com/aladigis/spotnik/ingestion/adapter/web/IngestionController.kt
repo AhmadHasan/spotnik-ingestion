@@ -10,16 +10,18 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class IngestionController {
-
     @Autowired
     private lateinit var ingestionPort: IngestionPort
 
     @PostMapping("/ingest")
-    fun ingest(@RequestParam fromLine: Int = 0, @RequestParam toLine: Int = Int.MAX_VALUE): ResponseEntity<String> {
+    fun ingest(
+        @RequestParam fromLine: Int = 0,
+        @RequestParam toLine: Int = Int.MAX_VALUE,
+    ): ResponseEntity<String> {
         val chunk0 = "/Users/ahmadhaidar/Downloads/extracted_chunks_bash_bzip2/chunk_0001.json"
-        val allbz2 =  "/Users/ahmadhaidar/Downloads/latest-all.json.bz2"
+        val allbz2 = "/Users/ahmadhaidar/Downloads/latest-all.json.bz2"
         val fileName = allbz2
-        
+
         try {
             ingestionPort.ingest(fileName, fromLine, toLine)
             return ResponseEntity.ok("Ingestion completed successfully.")
