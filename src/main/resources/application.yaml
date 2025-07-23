@@ -6,6 +6,7 @@ spring:
       host: localhost
       port: 27017
       database: wikidata
+      auto-index-creation: true
   kafka:
     consumer:
       auto-offset-reset: earliest
@@ -21,5 +22,96 @@ kafka:
   bootstrap-servers: localhost:9092
 
 spotnik:
+  ner:
+    wikidata-type-mapping:
+      PERSON:
+        - Q5             # Human
+      ORG:
+        - Q43229         # Organization
+        - Q783794        # Company
+        - Q163740        # Nonprofit organization
+        - Q7278          # Political party
+      GPE:
+        - Q6256          # Country
+        - Q515           # City
+        - Q3957          # Town
+        - Q56061         # Administrative territorial entity
+        - Q1182803       # Province
+        - Q82794         # Region
+      LOC:
+        - Q2221906       # Geographic location
+        - Q23442         # Island
+        - Q8502          # River
+        - Q8504          # Mountain
+      NORP:
+        - Q8436          # Ethnic group
+        - Q9174          # Religion
+        - Q28108         # Nationality
+      FAC:
+        - Q13226383      # Building
+        - Q1248784       # Facility
+        - Q62447         # Bridge
+        - Q1248784       # Airport
+        - Q811979        # Architectural structure
+      PRODUCT:
+        - Q2424752       # Product
+        - Q11446         # Car
+        - Q7397          # Software
+        - Q1047215       # Brand
+      EVENT:
+        - Q1190554       # Event
+        - Q180684        # Election
+        - Q198           # War
+        - Q1656682       # Sports event
+      WORK_OF_ART:
+        - Q838948        # Creative work
+        - Q13593966      # Film
+        - Q7725634       # Literary work
+        - Q386724        # Work
+      LAW:
+        - Q820655        # Legal document
+        - Q2334719       # Law
+      LANGUAGE:
+        - Q34770         # Language
   ingestion:
-    batch-size: 1000
+    batch-size: 100
+    ingestable-types:
+      - Q5
+      - Q43229
+      - Q783794
+      - Q163740
+      - Q7278
+      - Q6256
+      - Q515
+      - Q3957
+      - Q56061
+      - Q1182803
+      - Q82794
+      - Q2221906
+      - Q23442
+      - Q8502
+      - Q8504
+      - Q8436
+      - Q9174
+      - Q7278
+      - Q28108
+      - Q13226383
+      - Q1248784
+      - Q62447
+      - Q1248784
+      - Q811979
+      - Q2424752
+      - Q11446
+      - Q7397
+      - Q1047215
+      - Q1190554
+      - Q180684
+      - Q198
+      - Q1656682
+      - Q838948
+      - Q13593966
+      - Q7725634
+      - Q386724
+      - Q820655
+      - Q2334719
+      - Q34770

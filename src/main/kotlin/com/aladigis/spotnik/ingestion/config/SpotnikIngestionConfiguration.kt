@@ -7,4 +7,5 @@ import org.springframework.context.annotation.Configuration
 @ConfigurationProperties(prefix = "spotnik.ingestion")
 class SpotnikIngestionConfiguration {
     var batchSize: Int = 0
+    var ingestableTypes: List<String> = listOf()
 }

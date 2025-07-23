@@ -1,12 +1,15 @@
 package com.aladigis.spotnik.ingestion.service
 
+import com.aladigis.spotnik.ingestion.config.NerConfig
 import com.aladigis.spotnik.ingestion.config.SpotnikIngestionConfiguration
 import com.aladigis.spotnik.ingestion.model.LinkedEntity
 import com.aladigis.spotnik.ingestion.model.LinkedLabel
+import com.aladigis.spotnik.ingestion.model.WikidataType
 import com.aladigis.spotnik.ingestion.model.event.IngestionBatchRead
 import com.aladigis.spotnik.ingestion.port.IngestionPort
 import com.aladigis.spotnik.ingestion.port.data.LinkedEntityDataPort
 import com.aladigis.spotnik.ingestion.port.data.LinkedLabelDataPort
+import com.aladigis.spotnik.ingestion.port.data.WikidataTypeDataPort
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
@@ -31,9 +34,16 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
     private lateinit var appConfig: SpotnikIngestionConfiguration
 
     @Autowired
+    private lateinit var nerConfig: NerConfig
+
+    @Autowired
+    private lateinit var wikidataTypeDataPort: WikidataTypeDataPort
+
+    @Autowired
     private lateinit var applicationEventPublisher: org.springframework.context.ApplicationEventPublisher
 
-    private val logger = LoggerFactory.getLogger(IngestionService::class.java)
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val objectMapper = jacksonObjectMapper()
 
@@ -78,7 +88,8 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
                         return@forEach
                     }
                 }
-                print("\rProcessing line number $counter: $line")
+                print("\rProcessing line number $counter. Time since start: ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.")
+
                 val trimmedLine = line.trim()
                 if (trimmedLine.isEmpty() || trimmedLine == "[" || trimmedLine == "]") return@forEach
 
@@ -107,6 +118,7 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
         logger.info("Processed $counter items from file: $fileName in ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.")
     }
 
+
     private fun publishLines(lines: MutableList<String>) {
         applicationEventPublisher.publishEvent(
             IngestionBatchRead(
@@ -121,8 +133,10 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
         event.lines.forEach { line ->
             try {
                 val rawItem: JsonNode = objectMapper.readTree(line)
-                val linkedEntity = transformItemData(rawItem)
-                if (linkedEntity != null) {
+                var linkedEntity = transformItemData(rawItem)
+                if((linkedEntity != null)){
+                    if(linkedEntity.spacyTypes.isEmpty())
+                        linkedEntity = enrichIfRelevant(linkedEntity) ?: return@forEach
                     entities.add(linkedEntity)
                     val entityLabels = extractLabels(linkedEntity.id, rawItem)
                     labels.addAll(entityLabels)
@@ -136,19 +150,15 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
         linkedLabelDataPort.saveAll(labels)
     }
 
-    private fun saveResidualData(
-        entities: MutableList<LinkedEntity>,
-        labels: MutableList<LinkedLabel>,
-        counter: Int,
-    ) {
-        if (entities.isNotEmpty()) {
-            linkedEntityDataPort.saveAll(entities)
-            entities.clear()
-        }
-        if (labels.isNotEmpty()) {
-            linkedLabelDataPort.saveAll(labels)
-            labels.clear()
-        }
+    fun enrichIfRelevant(linkedEntity: LinkedEntity): LinkedEntity? {
+        if (linkedEntity.instanceOf.isEmpty()) return null
+
+        val types = wikidataTypeDataPort.findByIdIn(linkedEntity.instanceOf)
+        if (types.isEmpty()) return null
+        else
+            return linkedEntity.copy(
+                spacyTypes = types.flatMap { it.spacyTypes }.distinct(),
+            )
     }
 
     private fun transformItemData(rawItem: JsonNode): LinkedEntity? {
@@ -218,6 +228,7 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
             descriptions = descriptions,
             instanceOf = instanceOf,
             features = features.mapValues { it.value },
+            spacyTypes = nerConfig.getSpacyTypes(instanceOf),
             wikipediaUrlNames = wikipediaUrlNames,
         )
     }

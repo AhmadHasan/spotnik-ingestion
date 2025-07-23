@@ -22,14 +22,15 @@ class LinkedEntityDataService : LinkedEntityDataPort {
         val result = linkedEntityRepository.findAllById(ids)
 
         val endTime = System.currentTimeMillis()
-        logger.info("Trace ID: $traceId - Repository call findByIds took ${endTime - startTime} ms")
+        //TODO: Set a flag int the config to log all times
+        // logger.info("Trace ID: $traceId - Repository call findByIds took ${endTime - startTime} ms")
         return result
     }
 
     override fun saveAll(entities: List<LinkedEntity>): List<LinkedEntity> {
         val startTime = System.currentTimeMillis()
         val result = linkedEntityRepository.saveAll(entities)
-        logger.info("Repository call saveAll with ${entities.size} entities took ${System.currentTimeMillis() - startTime} ms")
+       // logger.info("Repository call saveAll with ${entities.size} entities took ${System.currentTimeMillis() - startTime} ms")
         return result
     }
 }
