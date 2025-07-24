@@ -21,9 +21,11 @@ class IngestionController {
         @RequestParam fromLine: Int = 0,
         @RequestParam toLine: Int = Int.MAX_VALUE,
     ): ResponseEntity<String> {
-        val chunk0 = "/Users/ahmadhaidar/Downloads/extracted_chunks_bash_bzip2/chunk_0001.json"
-        val allbz2 = "/Users/ahmadhaidar/Downloads/latest-all.json.bz2"
-        val fileName = allbz2
+        //val fileName = "/Users/ahmadhaidar/Downloads/extracted_chunks_bash_bzip2/chunk_0001.json"
+        // val fileName = "/Users/ahmadhaidar/Downloads/latest-all.json.bz2"
+        //val fileName = "/Users/ahmadhaidar/Downloads/trump.json"
+
+        val fileName = "latest-all.json.bz2"
 
         try {
             ingestionPort.ingest(fileName, fromLine, toLine)

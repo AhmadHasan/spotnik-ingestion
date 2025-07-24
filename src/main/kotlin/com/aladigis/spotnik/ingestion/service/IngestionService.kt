@@ -4,8 +4,6 @@ import com.aladigis.spotnik.ingestion.config.NerConfig
 import com.aladigis.spotnik.ingestion.config.SpotnikIngestionConfiguration
 import com.aladigis.spotnik.ingestion.model.LinkedEntity
 import com.aladigis.spotnik.ingestion.model.LinkedLabel
-import com.aladigis.spotnik.ingestion.model.WikidataType
-import com.aladigis.spotnik.ingestion.model.event.IngestionBatchRead
 import com.aladigis.spotnik.ingestion.port.IngestionPort
 import com.aladigis.spotnik.ingestion.port.data.LinkedEntityDataPort
 import com.aladigis.spotnik.ingestion.port.data.LinkedLabelDataPort
@@ -15,7 +13,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 import java.io.BufferedReader
 import java.io.File
@@ -23,7 +20,7 @@ import java.io.InputStreamReader
 import java.util.zip.ZipException
 
 @Service
-class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> {
+class IngestionService : IngestionPort {
     @Autowired
     private lateinit var linkedEntityDataPort: LinkedEntityDataPort
 
@@ -46,6 +43,10 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val objectMapper = jacksonObjectMapper()
+
+    private var processedBatches = 0
+
+    private val MAX_QUEUE_SIZE = 20
 
     override fun ingest(
         fileName: String,
@@ -74,6 +75,7 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
 
         var counter = -1
         val batchSize = appConfig.batchSize
+        var batchNumber = 1
 
         val lines = mutableListOf<String>()
         logger.info("Processing file: $fileName with block size: $batchSize, from line: $fromLine to line: $toLine.")
@@ -81,6 +83,7 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
         reader.use { bufferedReader ->
             bufferedReader.lines().forEach { line ->
                 counter++
+                batchNumber = counter / batchSize + 1
 
                 if (fromLine > 0) {
                     if (counter < fromLine) {
@@ -88,7 +91,7 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
                         return@forEach
                     }
                 }
-                print("\rProcessing line number $counter. Time since start: ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.")
+                print("\rProcessing line number $counter (Batch Nr.: $batchNumber, processed Batches: $processedBatches). Time since start: ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.")
 
                 val trimmedLine = line.trim()
                 if (trimmedLine.isEmpty() || trimmedLine == "[" || trimmedLine == "]") return@forEach
@@ -100,37 +103,44 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
                 if (toLine < Int.MAX_VALUE && counter >= toLine) {
                     logger.info("Reached the end line $toLine. Stopping processing.")
                     if (lines.isNotEmpty()) {
-                        publishLines(lines)
+                        while(batchNumber - processedBatches > MAX_QUEUE_SIZE) {
+                            Thread.sleep(1000L)
+                            logger.info("Waiting for batch processing to catch up. Current batch number: $batchNumber, processed batches: $processedBatches.")
+                        }
+                        startBatchProcessing(counter / batchSize + 1, lines)
                     }
                     return@forEach
                 }
 
                 if (counter % batchSize == 0) {
-                    publishLines(lines)
+                    startBatchProcessing(batchNumber, lines.toList())
                     lines.clear()
                 }
             }
         }
         // End of file, publish any remaining lines
         if (lines.isNotEmpty()) {
-            publishLines(lines)
+            startBatchProcessing(batchNumber, lines)
         }
         logger.info("Processed $counter items from file: $fileName in ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.")
     }
 
 
-    private fun publishLines(lines: MutableList<String>) {
-        applicationEventPublisher.publishEvent(
-            IngestionBatchRead(
-                lines,
-            ),
-        )
-    }
 
-    override fun onApplicationEvent(event: IngestionBatchRead) {
+    fun startBatchProcessing(batchNumber: Int, lines: List<String>) {
+        Thread {
+            try {
+                processBatch(batchNumber, lines)
+            } catch (e: Exception) {
+                logger.error("Error processing batch $batchNumber: ${e.message}", e)
+            }
+        }.start()
+
+    }
+    fun processBatch(batchNumber: Int, lines: List<String>) {
         val entities = mutableListOf<LinkedEntity>()
         val labels = mutableListOf<LinkedLabel>()
-        event.lines.forEach { line ->
+        lines.forEach { line ->
             try {
                 val rawItem: JsonNode = objectMapper.readTree(line)
                 var linkedEntity = transformItemData(rawItem)
@@ -148,6 +158,11 @@ class IngestionService : IngestionPort, ApplicationListener<IngestionBatchRead> 
 
         linkedEntityDataPort.saveAll(entities)
         linkedLabelDataPort.saveAll(labels)
+        // safely increment the processed batches count
+        synchronized(this) {
+            processedBatches++
+        }
+        logger.info("Batch $batchNumber processed with ${entities.size} entities and ${labels.size} labels.")
     }
 
     fun enrichIfRelevant(linkedEntity: LinkedEntity): LinkedEntity? {

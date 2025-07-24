@@ -43,6 +43,7 @@ class IngestionServiceTest {
                 instanceOf = listOf("Q2"),
                 features = mapOf("P31" to listOf("Q2")),
                 wikipediaUrlNames = mapOf("en" to "Sample_Wikipedia_Page"),
+                spacyTypes = listOf("Type1", "Type2"),
             )
         val expectedLabels =
             listOf(
