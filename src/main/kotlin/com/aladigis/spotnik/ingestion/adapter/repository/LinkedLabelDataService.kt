@@ -48,7 +48,7 @@ class LinkedLabelDataService : LinkedLabelDataPort {
     override fun saveAll(linkedLabels: List<LinkedLabel>): List<LinkedLabel> {
         val startTime = System.currentTimeMillis()
         val result = linkedLabelRepository.saveAll(linkedLabels)
-        //logger.info("Repository call saveAll with ${linkedLabels.size} labels took ${System.currentTimeMillis() - startTime} ms")
+        // logger.info("Repository call saveAll with ${linkedLabels.size} labels took ${System.currentTimeMillis() - startTime} ms")
         return result
     }
 }

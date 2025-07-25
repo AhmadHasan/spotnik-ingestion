@@ -16,14 +16,15 @@ class IngestionController {
 
     @Autowired
     private lateinit var wikdataTypeIngestionPort: WikdataTypeIngestionPort
+
     @PostMapping("/ingest")
     fun ingest(
         @RequestParam fromLine: Int = 0,
         @RequestParam toLine: Int = Int.MAX_VALUE,
     ): ResponseEntity<String> {
-        //val fileName = "/Users/ahmadhaidar/Downloads/extracted_chunks_bash_bzip2/chunk_0001.json"
+        // val fileName = "/Users/ahmadhaidar/Downloads/extracted_chunks_bash_bzip2/chunk_0001.json"
         // val fileName = "/Users/ahmadhaidar/Downloads/latest-all.json.bz2"
-        //val fileName = "/Users/ahmadhaidar/Downloads/trump.json"
+        // val fileName = "/Users/ahmadhaidar/Downloads/trump.json"
 
         val fileName = "latest-all.json.bz2"
 
@@ -37,7 +38,8 @@ class IngestionController {
 
     @PostMapping("/ingest-types")
     fun ingestTypes(): ResponseEntity<String> {
-        val fileName = "/Users/ahmadhaidar/Downloads/wikidata_types/newBegin/all_clean_no_header.tsv"
+        // val fileName = "/Users/ahmadhaidar/Downloads/wikidata_types/newBegin/all_clean_no_header.tsv"
+        val fileName = "wikidata_types"
         try {
             wikdataTypeIngestionPort.ingestSubtypes(fileName)
             return ResponseEntity.ok("Ingestion of types completed successfully.")

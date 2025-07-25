@@ -36,24 +36,24 @@ class IngestionService : IngestionPort {
     @Autowired
     private lateinit var wikidataTypeDataPort: WikidataTypeDataPort
 
-    @Autowired
-    private lateinit var applicationEventPublisher: org.springframework.context.ApplicationEventPublisher
-
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val objectMapper = jacksonObjectMapper()
 
     private var processedBatches = 0
 
-    private val MAX_QUEUE_SIZE = 20
+    companion object {
+        private const val MAX_QUEUE_SIZE = 20
+    }
+
+    var startTime = 0L
 
     override fun ingest(
         fileName: String,
         fromLine: Int,
         toLine: Int,
     ) {
-        val startTime = System.currentTimeMillis()
+        startTime = System.currentTimeMillis()
 
         val file = File(fileName)
         if (!file.exists()) {
@@ -91,7 +91,6 @@ class IngestionService : IngestionPort {
                         return@forEach
                     }
                 }
-                print("\rProcessing line number $counter (Batch Nr.: $batchNumber, processed Batches: $processedBatches). Time since start: ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.")
 
                 val trimmedLine = line.trim()
                 if (trimmedLine.isEmpty() || trimmedLine == "[" || trimmedLine == "]") return@forEach
@@ -103,9 +102,12 @@ class IngestionService : IngestionPort {
                 if (toLine < Int.MAX_VALUE && counter >= toLine) {
                     logger.info("Reached the end line $toLine. Stopping processing.")
                     if (lines.isNotEmpty()) {
-                        while(batchNumber - processedBatches > MAX_QUEUE_SIZE) {
+                        while (batchNumber - processedBatches > MAX_QUEUE_SIZE) {
                             Thread.sleep(1000L)
-                            logger.info("Waiting for batch processing to catch up. Current batch number: $batchNumber, processed batches: $processedBatches.")
+                            logger.info(
+                                "Waiting for batch processing to catch up. Current batch number: $batchNumber, " +
+                                    "processed batches: $processedBatches.",
+                            )
                         }
                         startBatchProcessing(counter / batchSize + 1, lines)
                     }
@@ -125,9 +127,10 @@ class IngestionService : IngestionPort {
         logger.info("Processed $counter items from file: $fileName in ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.")
     }
 
-
-
-    fun startBatchProcessing(batchNumber: Int, lines: List<String>) {
+    fun startBatchProcessing(
+        batchNumber: Int,
+        lines: List<String>,
+    ) {
         Thread {
             try {
                 processBatch(batchNumber, lines)
@@ -135,18 +138,22 @@ class IngestionService : IngestionPort {
                 logger.error("Error processing batch $batchNumber: ${e.message}", e)
             }
         }.start()
-
     }
-    fun processBatch(batchNumber: Int, lines: List<String>) {
+
+    fun processBatch(
+        batchNumber: Int,
+        lines: List<String>,
+    ) {
         val entities = mutableListOf<LinkedEntity>()
         val labels = mutableListOf<LinkedLabel>()
         lines.forEach { line ->
             try {
                 val rawItem: JsonNode = objectMapper.readTree(line)
                 var linkedEntity = transformItemData(rawItem)
-                if((linkedEntity != null)){
-                    if(linkedEntity.spacyTypes.isEmpty())
+                if ((linkedEntity != null)) {
+                    if (linkedEntity.spacyTypes.isEmpty()) {
                         linkedEntity = enrichIfRelevant(linkedEntity) ?: return@forEach
+                    }
                     entities.add(linkedEntity)
                     val entityLabels = extractLabels(linkedEntity.id, rawItem)
                     labels.addAll(entityLabels)
@@ -162,18 +169,26 @@ class IngestionService : IngestionPort {
         synchronized(this) {
             processedBatches++
         }
-        logger.info("Batch $batchNumber processed with ${entities.size} entities and ${labels.size} labels.")
+        logger.info(
+            "Batch $batchNumber processed with ${entities.size} entities and ${labels.size} labels. " +
+                "Time since start: ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.",
+        )
     }
 
     fun enrichIfRelevant(linkedEntity: LinkedEntity): LinkedEntity? {
-        if (linkedEntity.instanceOf.isEmpty()) return null
+        val rootTypes =
+            wikidataTypeDataPort.findByIdIn(linkedEntity.instanceOf)
+                .map { it.rootTypes }
+                .flatten().distinct()
 
-        val types = wikidataTypeDataPort.findByIdIn(linkedEntity.instanceOf)
-        if (types.isEmpty()) return null
-        else
+        if (rootTypes.isEmpty()) {
+            return null
+        } else {
+            val spacyTypes = nerConfig.getSpacyTypes(rootTypes).distinct()
             return linkedEntity.copy(
-                spacyTypes = types.flatMap { it.spacyTypes }.distinct(),
+                spacyTypes = spacyTypes,
             )
+        }
     }
 
     private fun transformItemData(rawItem: JsonNode): LinkedEntity? {

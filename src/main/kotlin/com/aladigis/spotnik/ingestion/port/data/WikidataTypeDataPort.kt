@@ -8,5 +8,6 @@ interface WikidataTypeDataPort {
     fun saveAll(wikidataTypes: List<WikidataType>)
 
     fun findById(id: String): WikidataType?
+
     fun findByIdIn(typeIds: List<String>): List<WikidataType>
 }

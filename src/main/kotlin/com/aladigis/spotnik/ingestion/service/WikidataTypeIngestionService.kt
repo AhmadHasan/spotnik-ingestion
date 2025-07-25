@@ -3,20 +3,19 @@ package com.aladigis.spotnik.ingestion.service
 import com.aladigis.spotnik.ingestion.config.NerConfig
 import com.aladigis.spotnik.ingestion.model.WikidataType
 import com.aladigis.spotnik.ingestion.port.WikdataTypeIngestionPort
-import java.io.File
+import com.aladigis.spotnik.ingestion.port.data.WikidataTypeDataPort
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import com.aladigis.spotnik.ingestion.port.data.WikidataTypeDataPort
+import java.io.File
 
 @Service
-class WikidataTypeIngestionService: WikdataTypeIngestionPort {
+class WikidataTypeIngestionService : WikdataTypeIngestionPort {
     companion object {
         private const val BATCH_SIZE = 1000
     }
 
     private val logger = LoggerFactory.getLogger(this::class.java)
-
 
     @Autowired
     private lateinit var nerConfig: NerConfig
@@ -24,7 +23,7 @@ class WikidataTypeIngestionService: WikdataTypeIngestionPort {
     @Autowired
     private lateinit var wikidataTypeDataPort: WikidataTypeDataPort
 
-    override fun ingestSubtypes(fileName: String){
+    override fun ingestSubtypes(fileName: String) {
         val startTime = System.currentTimeMillis()
         val file = File(fileName)
         if (!file.exists()) {
@@ -41,14 +40,14 @@ class WikidataTypeIngestionService: WikdataTypeIngestionPort {
                 val rootType = parts[0].trim()
                 val subtype = parts[1].trim()
                 val label = parts[2].trim()
-                val spacyType =  nerConfig.getSpacyType(rootType)
+                val spacyType = nerConfig.getSpacyType(rootType)
                 types.add(
                     WikidataType(
                         rootTypes = listOf(rootType),
                         id = subtype,
                         label = label,
                         spacyTypes = listOf(spacyType),
-                    )
+                    ),
                 )
 //                if(batch.size == BATCH_SIZE) {
 //                    wikidataTypeDataPort.saveAll(batch)
@@ -60,11 +59,11 @@ class WikidataTypeIngestionService: WikdataTypeIngestionPort {
         // order batch by id to ensure consistent ordering
         types.sortBy { it.id }
         // find redundant types
-        //val uniqueTypes = types.distinctBy { it.id }
+        // val uniqueTypes = types.distinctBy { it.id }
         mergeTypes(types)
-        //logger.info("Found ${types.size} types, merged to ${mergedTypes.size} unique types.")
+        // logger.info("Found ${types.size} types, merged to ${mergedTypes.size} unique types.")
         // save all types in one go
-        //wikidataTypeDataPort.saveAll(mergedTypes)
+        // wikidataTypeDataPort.saveAll(mergedTypes)
 
 //        if(batch.isNotEmpty()) {
 //                wikidataTypeDataPort.saveAll(batch)
@@ -75,7 +74,7 @@ class WikidataTypeIngestionService: WikdataTypeIngestionPort {
         logger.info("Ingestion of types completed in ${(System.currentTimeMillis() - startTime) / 1000.0} seconds.")
     }
 
-    fun mergeTypes(types: List<WikidataType>){
+    fun mergeTypes(types: List<WikidataType>) {
         types.sortedBy { it.id }
         val distinctIds = types.map { it.id }.distinct()
 
@@ -97,8 +96,8 @@ class WikidataTypeIngestionService: WikdataTypeIngestionPort {
                     id = id,
                     rootTypes = rootTypes,
                     label = label,
-                    spacyTypes = spacyTypes
-                )
+                    spacyTypes = spacyTypes,
+                ),
             )
         }
     }

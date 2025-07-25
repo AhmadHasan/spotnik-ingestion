@@ -74,7 +74,7 @@ spotnik:
       LANGUAGE:
         - Q34770         # Language
   ingestion:
-    batch-size: 100
+    batch-size: 200
     ingestable-types:
       - Q5
       - Q43229

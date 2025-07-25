@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class WikidataTypeDataService: WikidataTypeDataPort {
-
+class WikidataTypeDataService : WikidataTypeDataPort {
     @Autowired
     private lateinit var wikidataTypeRepository: WikidataTypeRepository
 
