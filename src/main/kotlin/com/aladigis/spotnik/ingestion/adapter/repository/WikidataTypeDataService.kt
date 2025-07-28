@@ -18,11 +18,7 @@ class WikidataTypeDataService : WikidataTypeDataPort {
         wikidataTypeRepository.saveAll(wikidataTypes)
     }
 
-    override fun findById(id: String): WikidataType? {
-        return wikidataTypeRepository.findById(id).orElse(null)
-    }
+    override fun findById(id: String): WikidataType? = wikidataTypeRepository.findById(id).orElse(null)
 
-    override fun findByIdIn(typeIds: List<String>): List<WikidataType> {
-        return wikidataTypeRepository.findAllById(typeIds)
-    }
+    override fun findByIdIn(typeIds: List<String>): List<WikidataType> = wikidataTypeRepository.findAllById(typeIds)
 }

@@ -10,7 +10,8 @@ data class NerConfig(
 ) {
     fun getSpacyType(wikimediaType: String): String {
         val keys =
-            wikidataTypeMapping.filter { it.value.contains(wikimediaType) }
+            wikidataTypeMapping
+                .filter { it.value.contains(wikimediaType) }
                 .keys
         if (keys.isEmpty()) {
             throw IllegalArgumentException(
@@ -29,11 +30,12 @@ data class NerConfig(
 
     fun getSpacyTypes(wikimediaTypes: List<String>): List<String> {
         val spacyTypes =
-            wikimediaTypes.map { wikimediaType ->
-                wikidataTypeMapping.filter { it.value.contains(wikimediaType) }
-                    .keys
-            }
-                .flatten()
+            wikimediaTypes
+                .map { wikimediaType ->
+                    wikidataTypeMapping
+                        .filter { it.value.contains(wikimediaType) }
+                        .keys
+                }.flatten()
                 .distinct()
         return spacyTypes
     }

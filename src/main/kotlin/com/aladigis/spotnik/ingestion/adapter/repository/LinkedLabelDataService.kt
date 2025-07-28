@@ -13,27 +13,19 @@ class LinkedLabelDataService : LinkedLabelDataPort {
 
     private val logger = LoggerFactory.getLogger(LinkedLabelDataService::class.java)
 
-    override fun findByEntityId(entityId: String): List<LinkedLabel> {
-        return linkedLabelRepository.findByEntityId(entityId)
-    }
+    override fun findByEntityId(entityId: String): List<LinkedLabel> = linkedLabelRepository.findByEntityId(entityId)
 
     override fun findByValueAndLanguage(
         value: String,
         language: String,
-    ): LinkedLabel? {
-        return linkedLabelRepository.findByValueAndLanguage(value, language)
-    }
+    ): LinkedLabel? = linkedLabelRepository.findByValueAndLanguage(value, language)
 
     override fun findByValueContainingIgnoreCaseAndLanguage(
         value: String,
         language: String,
-    ): List<LinkedLabel> {
-        return linkedLabelRepository.findByValueContainingIgnoreCaseAndLanguage(value, language)
-    }
+    ): List<LinkedLabel> = linkedLabelRepository.findByValueContainingIgnoreCaseAndLanguage(value, language)
 
-    override fun findByMainTrue(): List<LinkedLabel> {
-        return linkedLabelRepository.findByMainTrue()
-    }
+    override fun findByMainTrue(): List<LinkedLabel> = linkedLabelRepository.findByMainTrue()
 
     override fun findByValueInAndLanguage(
         values: List<String>,

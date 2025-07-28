@@ -13,22 +13,20 @@ class HealthController {
     private lateinit var spotnikIngestionConfiguration: com.aladigis.spotnik.ingestion.config.SpotnikIngestionConfiguration
 
     @GetMapping
-    fun healthCheck(): ResponseEntity<Map<String, String>> {
-        return ResponseEntity.ok(
+    fun healthCheck(): ResponseEntity<Map<String, String>> =
+        ResponseEntity.ok(
             mapOf(
                 "status" to "UP",
                 "service" to "running",
             ),
         )
-    }
 
     @GetMapping("/config")
-    fun getConfig(): ResponseEntity<Map<String, Any>> {
-        return ResponseEntity.ok(
+    fun getConfig(): ResponseEntity<Map<String, Any>> =
+        ResponseEntity.ok(
             mapOf(
                 "batchSize" to spotnikIngestionConfiguration.batchSize,
                 "ingestableTypes" to spotnikIngestionConfiguration.ingestableTypes,
             ),
         )
-    }
 }

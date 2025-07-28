@@ -6,7 +6,5 @@ import org.springframework.web.bind.annotation.GetMapping
 @Controller
 class WebController {
     @GetMapping("/test")
-    fun showTestPage(): String {
-        return "ner"
-    }
+    fun showTestPage(): String = "ner"
 }

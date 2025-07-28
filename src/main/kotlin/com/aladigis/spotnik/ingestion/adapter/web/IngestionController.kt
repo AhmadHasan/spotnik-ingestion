@@ -39,7 +39,7 @@ class IngestionController {
     @PostMapping("/ingest-types")
     fun ingestTypes(): ResponseEntity<String> {
         // val fileName = "/Users/ahmadhaidar/Downloads/wikidata_types/newBegin/all_clean_no_header.tsv"
-        val fileName = "wikidata_types"
+        val fileName = "all_clean_no_header.tsv"
         try {
             wikdataTypeIngestionPort.ingestSubtypes(fileName)
             return ResponseEntity.ok("Ingestion of types completed successfully.")
